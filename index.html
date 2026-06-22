@@ -41,27 +41,37 @@
     border: 0.5px solid #E3E1D8; border-radius: 10px;
     background: white; display: flex; flex-direction: column;
     align-items: flex-start; justify-content: flex-start;
-    padding: 7px; gap: 5px; cursor: pointer;
+    padding: 5px; gap: 4px; cursor: pointer;
   }
   .day-cell:hover { border-color: #B4B2A9; }
   .day-cell.empty { visibility: hidden; cursor: default; }
-  .day-num { font-size: 15px; }
+  .day-num { font-size: 13px; }
   .dot-row { display: flex; gap: 3px; }
-  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
   .editor {
     display: none; margin-top: 1.2rem;
     background: white; border: 0.5px solid #E3E1D8;
-    border-radius: 14px; padding: 1.2rem 1.5rem;
+    border-radius: 14px; padding: 1rem 1.2rem;
   }
   .editor-header {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
-  .editor-header p { font-family: 'Jua', sans-serif; font-size: 16px; margin: 0; }
+  .editor-header p { font-family: 'Jua', sans-serif; font-size: 15px; margin: 0; }
   .editor-header button {
     width: 28px; height: 28px; padding: 0; border: none; background: none;
     cursor: pointer; font-size: 18px; color: #888780;
   }
+  .color-row {
+    display: flex; gap: 8px; margin-bottom: 10px; align-items: center;
+  }
+  .color-row span { font-size: 12px; color: #888780; }
+  .color-btn {
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent;
+    cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;
+    background: none; transition: border-color 0.15s;
+  }
+  .color-btn.selected { border-color: #2C2C2A; }
   .input-row { display: flex; gap: 8px; }
   .input-row input {
     flex: 1; font-family: 'Gowun Dodum', sans-serif;
@@ -107,6 +117,12 @@
       <p id="editor-date"></p>
       <button id="close-editor">&times;</button>
     </div>
+    <div class="color-row">
+      <span>색 선택</span>
+      <button class="color-btn selected" data-color="#FBD9E2" id="color-0">🌸</button>
+      <button class="color-btn" data-color="#CDE9F6" id="color-1">❄️</button>
+      <button class="color-btn" data-color="#E4DAF1" id="color-2">🌷</button>
+    </div>
     <div class="input-row">
       <input id="book-input" type="text" placeholder="읽은 책 제목" />
       <button id="add-btn">추가</button>
@@ -124,6 +140,7 @@ const STORAGE_KEY = 'reading-calendar-data';
 let current = new Date();
 let data = {};
 let selectedKey = null;
+let selectedColor = '#FBD9E2';
 
 function keyOf(y,m,d){ return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'); }
 
@@ -133,6 +150,15 @@ function load(){
 function save(){
   try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(data)); }catch(e){}
 }
+
+// 색 선택 버튼
+document.querySelectorAll('.color-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedColor = btn.dataset.color;
+  });
+});
 
 function renderWeekdays(){
   const row=document.getElementById('weekday-row');
@@ -172,10 +198,10 @@ function renderGrid(){
       const books=data[k]||[];
       const dotRow=document.createElement('div');
       dotRow.className='dot-row';
-      books.slice(0,4).forEach((_,idx)=>{
+      books.slice(0,4).forEach((book)=>{
         const dot=document.createElement('span');
         dot.className='dot';
-        dot.style.background=palette[idx%palette.length];
+        dot.style.background=book.color||'#FBD9E2';
         dotRow.appendChild(dot);
       });
       cell.appendChild(dotRow);
@@ -190,6 +216,10 @@ function openEditor(k,y,m,d){
   document.getElementById('editor').style.display='block';
   document.getElementById('editor-date').textContent=y+'년 '+(m+1)+'월 '+d+'일';
   document.getElementById('book-input').value='';
+  // 색 초기화
+  selectedColor='#FBD9E2';
+  document.querySelectorAll('.color-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('color-0').classList.add('selected');
   renderList();
 }
 
@@ -203,16 +233,16 @@ function renderList(){
     p.textContent='아직 기록한 책이 없어요';
     list.appendChild(p);
   }
-  books.forEach((title,idx)=>{
+  books.forEach((book,idx)=>{
     const row=document.createElement('div');
     row.className='book-row';
     const left=document.createElement('span');
     left.className='left';
     const dot=document.createElement('span');
     dot.className='dot';
-    dot.style.background=palette[idx%palette.length];
+    dot.style.background=book.color||'#FBD9E2';
     const span=document.createElement('span');
-    span.textContent=title;
+    span.textContent=book.title;
     left.appendChild(dot); left.appendChild(span);
     const del=document.createElement('button');
     del.innerHTML='&times;';
@@ -231,7 +261,7 @@ function addBook(){
   const val=input.value.trim();
   if(!val||!selectedKey) return;
   if(!data[selectedKey]) data[selectedKey]=[];
-  data[selectedKey].push(val);
+  data[selectedKey].push({ title: val, color: selectedColor });
   input.value='';
   save(); renderList(); renderGrid();
 }
