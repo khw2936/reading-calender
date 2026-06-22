@@ -36,13 +36,13 @@
   }
   .weekday-row div {
     padding: 4px 0; text-align: center;
-    font-family: 'Jua', sans-serif; font-size: 11px;
+    font-family: 'Jua', sans-serif; font-size: 13px;
   }
   .day-grid {
-    display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
   }
   .day-cell {
-    aspect-ratio: 1 / 1; max-height: 52px;
+    aspect-ratio: 1 / 1; max-height: 80px;
     border: 0.5px solid #E3E1D8; border-radius: 8px;
     background: white;
     display: flex; flex-direction: column;
@@ -51,9 +51,9 @@
   }
   .day-cell:hover { border-color: #B4B2A9; }
   .day-cell.empty { visibility: hidden; cursor: default; }
-  .day-num { font-size: 12px; }
+  .day-num { font-size: 15px; }
   .dot-row { display: flex; gap: 2px; min-height: 6px; }
-  .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
   .editor {
     display: none; margin-top: 1.25rem;
     background: white; border: 0.5px solid #E3E1D8;
